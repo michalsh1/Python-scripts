@@ -1,3 +1,5 @@
+from collections import Counter
+
 import pyodbc
 import pandas
 
@@ -108,8 +110,12 @@ df_Specie_clean = df_Specie.drop(['SpeciePic'], axis=1)
 df_Crawl_Specie = pandas.merge(df_Crawl_clean, df_Specie_clean, left_on='SpecieID', right_on='SpecieId')
 df_Crawl_Specie_Location = pandas.merge(df_Crawl_Specie, df_Location_Regions, left_on= 'Location', right_on='LocationID')
 
+df_CrawlContact.shape[0]==df_CrawlContact.CrawlID.nunique()
 
-# todo find a solution for contact info
+c=Counter(words)
+for k in c.keys():
+    print(k, c[k])
+# todo find a solution for contact info: when few observers for same crawl
 
 
 
