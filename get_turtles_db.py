@@ -71,7 +71,10 @@ df_Regions = pandas.read_sql(query_Regions, connection)
 df_Contact.columns
 
 ### contact df:
-df_Contact['FullName']= df_Contact['ContactFname'] + ' ' + df_Contact['ContactLname']
+# df_Contact['FullName']= df_Contact['ContactFname'] + ' ' + df_Contact['ContactLname']
+# df_Contact['FullNameTRY']= df_Contact['ContactFname'].astype(str) + ' ' + df_Contact['ContactLname'].astype(str)
+df_Contact['FullName']= df_Contact['ContactFname'].fillna('') + ' ' + df_Contact['ContactLname'].fillna('')
+
 df_Contacts_clean = df_Contact.drop(['ContactFname',
                                      'ContactLname',
                                      'ContactPhoto',
@@ -113,8 +116,18 @@ df_Crawl_Specie_Location = pandas.merge(df_Crawl_Specie, df_Location_Regions, le
 
 # df_CrawlContact.shape[0]==df_CrawlContact.CrawlID.nunique()
 
+### check for nan FullNames:
+for n in range(0,len(df_Contacts_Position_Organization)):
+    print(df_Contacts_Position_Organization['FullName'][n],df_Contacts_Position_Organization['ContactId'][n])
+
+    #fixme: this code used for dinding a specific contact in a DB- use it in the next code (line128):
+    # df_Contacts_Position_Organization.loc[df_Contacts_Position_Organization['ContactId'] == 591, 'FullName']
+    ### example: https://stackoverflow.com/questions/36684013/extract-column-value-based-on-another-column-in-pandas
+
+
 # todo find a solution for contact info: when few observers for same crawl
 crawlids_counter=Counter(df_CrawlContact.CrawlID)
+crawlid=2899
 for crawlid in crawlids_counter.keys():
     if crawlids_counter[crawlid]>1:
         print('crawlid',crawlid)
