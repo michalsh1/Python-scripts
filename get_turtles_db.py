@@ -2,6 +2,7 @@ from collections import Counter
 
 import pyodbc
 import pandas
+import numpy as np
 
 def connect(path):
     try:
@@ -110,12 +111,33 @@ df_Specie_clean = df_Specie.drop(['SpeciePic'], axis=1)
 df_Crawl_Specie = pandas.merge(df_Crawl_clean, df_Specie_clean, left_on='SpecieID', right_on='SpecieId')
 df_Crawl_Specie_Location = pandas.merge(df_Crawl_Specie, df_Location_Regions, left_on= 'Location', right_on='LocationID')
 
-df_CrawlContact.shape[0]==df_CrawlContact.CrawlID.nunique()
+# df_CrawlContact.shape[0]==df_CrawlContact.CrawlID.nunique()
 
-c=Counter(words)
-for k in c.keys():
-    print(k, c[k])
 # todo find a solution for contact info: when few observers for same crawl
+crawlids_counter=Counter(df_CrawlContact.CrawlID)
+for crawlid in crawlids_counter.keys():
+    if crawlids_counter[crawlid]>1:
+        print('crawlid',crawlid)
+        contact_by_crawl_id=np.where(df_CrawlContact['CrawlID']==crawlid)[0]
+        # print('contact_by_crawl_id',contact_by_crawl_id)
+        crawlcontact=df_CrawlContact.iloc[contact_by_crawl_id]
+        # print('crawlcontact',crawlcontact)
+        contactid = crawlcontact['ContactID']
+        # print('contactid',contactid)
+        contact_list=[]
+        for crawlcontact_id in contactid:
+            contacts_ids = np.where(df_Contacts_Position_Organization['ContactId'] == crawlcontact_id)
+            # print('contacts_ids',contacts_ids)
+            contact = df_Contacts_Position_Organization.iloc[contacts_ids[0]]
+            # print('contact[FullName]',contact['FullName'].item())
+            contact_list.append(contact['FullName'].item())
+            str = ', '.join(contact_list)
+        print(str)
+
+
+
+
+
 
 
 
