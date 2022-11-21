@@ -68,7 +68,6 @@ df_Specie = pandas.read_sql(query_Specie, connection)
 df_TurtleEvent = pandas.read_sql(query_TurtleEvent, connection)
 df_Regions = pandas.read_sql(query_Regions, connection)
 
-df_Contact.columns
 
 ### contact df:
 # df_Contact['FullName']= df_Contact['ContactFname'] + ' ' + df_Contact['ContactLname']
@@ -120,35 +119,35 @@ df_Crawl_Specie_Location = pandas.merge(df_Crawl_Specie, df_Location_Regions, le
 for n in range(0,len(df_Contacts_Position_Organization)):
     print(df_Contacts_Position_Organization['FullName'][n],df_Contacts_Position_Organization['ContactId'][n])
 
-    #fixme: this code used for dinding a specific contact in a DB- use it in the next code (line128):
-    # df_Contacts_Position_Organization.loc[df_Contacts_Position_Organization['ContactId'] == 591, 'FullName']
-    ### example: https://stackoverflow.com/questions/36684013/extract-column-value-based-on-another-column-in-pandas
+# c = Counter()
+# for n in range(0,len(df_CrawlContact)):
+#     crawl_id = df_CrawlContact['CrawlID'][n]
+#     contactid = df_CrawlContact['ContactID'][n]
+#     print('crawl_id: ', crawl_id,'ContactID: ', contactid)
+#     c[crawl_id]+=1
 
 
-# todo find a solution for contact info: when few observers for same crawl
-crawlids_counter=Counter(df_CrawlContact.CrawlID)
-crawlid=2899
-for crawlid in crawlids_counter.keys():
-    if crawlids_counter[crawlid]>1:
-        print('crawlid',crawlid)
-        contact_by_crawl_id=np.where(df_CrawlContact['CrawlID']==crawlid)[0]
-        # print('contact_by_crawl_id',contact_by_crawl_id)
-        crawlcontact=df_CrawlContact.iloc[contact_by_crawl_id]
-        # print('crawlcontact',crawlcontact)
-        contactid = crawlcontact['ContactID']
-        # print('contactid',contactid)
+
+df_Crawl_Specie_Location_cotacts=df_Crawl_Specie_Location
+df_Crawl_Specie_Location_cotacts['observers_names'] = ''
+
+crawl_ids_counter=Counter(df_CrawlContact.CrawlID)
+for crawl_id in crawl_ids_counter.keys():
+    if crawl_ids_counter[crawl_id]>1: ## meaning there are >1 contact on this crawl
+        ilocs_of_crawl=np.where(df_CrawlContact['CrawlID']==crawl_id)[0]
+        contacts_ids=df_CrawlContact.iloc[ilocs_of_crawl]['ContactID']
+
         contact_list=[]
-        for crawlcontact_id in contactid:
-            contacts_ids = np.where(df_Contacts_Position_Organization['ContactId'] == crawlcontact_id)
-            # print('contacts_ids',contacts_ids)
-            contact = df_Contacts_Position_Organization.iloc[contacts_ids[0]]
-            # print('contact[FullName]',contact['FullName'].item())
+        for crawlcontact_id in contacts_ids:
+            iloc_contact_id = np.where(df_Contacts_Position_Organization['ContactId'] == crawlcontact_id)
+            contact = df_Contacts_Position_Organization.iloc[iloc_contact_id[0]]
             contact_list.append(contact['FullName'].item())
-            str = ', '.join(contact_list)
-        print(str)
+        contacts_str = ', '.join(contact_list)
+        print(contacts_str)
 
-
-
+        ## fixme - now need to insert into df_Crawl_Specie_Location_cotacts['observers_names'] , using 'CrawlID'
+#
+#
 
 
 
