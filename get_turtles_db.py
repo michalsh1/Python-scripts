@@ -110,7 +110,7 @@ df_Location_Regions = pandas.merge(df_Location, df_Regions_clean, left_on= 'Regi
 ### Crawls df
 df_Crawl_clean = df_Crawl.drop(['RegionalCrawlID'], axis=1)
 df_Specie_clean = df_Specie.drop(['SpeciePic'], axis=1)
-df_Crawl_Specie = pandas.merge(df_Crawl_clean, df_Specie_clean, left_on='SpecieID', right_on='SpecieId')
+df_Crawl_Specie = pandas.merge(df_Crawl_clean, df_Specie_clean, left_on='SpecieID', right_on='SpecieId',)
 df_Crawl_Specie_Location = pandas.merge(df_Crawl_Specie, df_Location_Regions, left_on= 'Location', right_on='LocationID')
 
 # df_CrawlContact.shape[0]==df_CrawlContact.CrawlID.nunique()
@@ -128,26 +128,40 @@ for n in range(0,len(df_Contacts_Position_Organization)):
 
 
 
-df_Crawl_Specie_Location_cotacts=df_Crawl_Specie_Location
-df_Crawl_Specie_Location_cotacts['observers_names'] = ''
+
+## להוסיף לפי Crawl id  את שם המדווח - אם יש כמה שמות- את הסטרינג שלהם, אם לא- אז את סטרינג המקור של שם המדווח
+
+def GetContactStr(crawlcontact_id):
+    iloc_contact_id = np.where(df_Contacts_Position_Organization['ContactId'] == crawlcontact_id)
+    contact = df_Contacts_Position_Organization.loc[df_Contacts_Position_Organization['ContactId'] == crawlcontact_id]
+    # contact = df_Contacts_Position_Organization.iloc[iloc_contact_id[0]]
+    contact_name = contact['FullName'].item()
+    return contact_name
+
+df_Crawl_Specie_Location_Contacts=df_Crawl_Specie_Location
+df_Crawl_Specie_Location_Contacts['observers_names'] = ''
+
+
 
 crawl_ids_counter=Counter(df_CrawlContact.CrawlID)
+crawl_ids_counter=Counter(df_CrawlContact.CrawlID)
+
 for crawl_id in crawl_ids_counter.keys():
-    if crawl_ids_counter[crawl_id]>1: ## meaning there are >1 contact on this crawl
-        ilocs_of_crawl=np.where(df_CrawlContact['CrawlID']==crawl_id)[0]
-        contacts_ids=df_CrawlContact.iloc[ilocs_of_crawl]['ContactID']
+    # ilocs_of_crawl = np.where(df_CrawlContact['CrawlID'] == crawl_id)[0]
+    # contacts_ids=df_CrawlContact.iloc[ilocs_of_crawl]['ContactID']
+    # print("a",contacts_ids)
 
-        contact_list=[]
-        for crawlcontact_id in contacts_ids:
-            iloc_contact_id = np.where(df_Contacts_Position_Organization['ContactId'] == crawlcontact_id)
-            contact = df_Contacts_Position_Organization.iloc[iloc_contact_id[0]]
-            contact_list.append(contact['FullName'].item())
-        contacts_str = ', '.join(contact_list)
-        print(contacts_str)
+    contacts_ids=df_CrawlContact.loc[df_CrawlContact.CrawlID == crawl_id]
+    contact_list = []
+    for crawlcontact_id in contacts_ids['ContactID']:
+        contact_name = GetContactStr(crawlcontact_id)
+        contact_list.append(contact_name)
+    contacts_str = ', '.join(contact_list)
 
-        ## fixme - now need to insert into df_Crawl_Specie_Location_cotacts['observers_names'] , using 'CrawlID'
-#
-#
+    iloc_crawl_id = np.where(df_Crawl_Specie_Location_Contacts['CrawlID'] == crawl_id)
+    print(crawl_id,iloc_crawl_id, contacts_str)
+        # contact = df_Crawl_Specie_Location_Contacts.iloc[iloc_contact_id[0]]
+
 
 
 
