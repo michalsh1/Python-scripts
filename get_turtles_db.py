@@ -4,7 +4,7 @@ import pyodbc
 import pandas
 import numpy as np
 
-def connect(path):
+def connect(db_path):
     try:
         odbc_connection_str = 'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=%s;' % (db_path)
         connection = pyodbc.connect(odbc_connection_str)
@@ -15,17 +15,6 @@ def connect(path):
 
 db_path = "C:/Users/michalsh/Downloads/TurtlesDB_be.mdb"
 connection = connect(db_path)
-# query = "SELECT * FROM ContactPosition"
-# cursor = connection.cursor()
-# cursor.execute(query)
-# cursor.columns()
-# cursor.fetchone()
-# for row in cursor.fetchall():
-#     print(row)
-
-# df= pandas.read_sql(query, connection)
-# df.head()
-
 
 query_AcCrawl = "SELECT * FROM AcCrawl"
 query_AcHatch = "SELECT * FROM AcHatch"
@@ -45,8 +34,6 @@ query_Organization = "SELECT * FROM Organization"
 query_Specie = "SELECT * FROM Specie"
 query_TurtleEvent = "SELECT * FROM TurtleEvent"
 query_Regions = "SELECT * FROM Regions"
-# query_ = "SELECT * FROM Turtle"
-# query_ = "SELECT * FROM "
 
 
 df_AcCrawl = pandas.read_sql(query_AcCrawl, connection)
@@ -97,54 +84,46 @@ df_Contacts_clean = df_Contact.drop(['ContactFname',
                                      'VolunteerInsurance',
                                      'ContactOwner',
                                      'ContactOwnerCode'], axis=1)
-
-df_ContactPosition_Organization = pandas.merge(df_ContactPosition, df_Organization, left_on='Organization', right_on='OrganizationID', how='outer')
-df_Contacts_Position_Organization = pandas.merge(df_Contacts_clean, df_ContactPosition_Organization, left_on='ContactPosition', right_on='PositionID', how='outer')
+df_ContactPosition_Organization = pandas.merge(df_ContactPosition, df_Organization, left_on='Organization', right_on='OrganizationID', how='left')
+df_Contacts_Position_Organization = pandas.merge(df_Contacts_clean, df_ContactPosition_Organization, left_on='ContactPosition', right_on='PositionID', how='left')
+print(df_Contact.shape[0]==df_Contacts_Position_Organization.shape[0])
 
 
 ### location df
-df_Regions_clean = df_Regions.drop(['RegionSite','RegionNorth','RegionSouth','RegionEast','RegionWest'],axis=1)
-df_Location_Regions = pandas.merge(df_Location, df_Regions_clean, left_on= 'Region', right_on='RegionId', how='outer')
+df_Regions_clean = df_Regions.drop(['RegionSite', 'RegionNorth', 'RegionSouth', 'RegionEast', 'RegionWest'], axis=1)
+df_Location_Regions = pandas.merge(df_Location, df_Regions_clean, left_on='Region', right_on='RegionId', how='left')
+print(df_Location.shape[0] == df_Location_Regions.shape[0])
 
 
 ### Crawls df
 df_Crawl_clean = df_Crawl.drop(['RegionalCrawlID'], axis=1)
 df_Specie_clean = df_Specie.drop(['SpeciePic'], axis=1)
-df_Crawl_Specie = pandas.merge(df_Crawl_clean, df_Specie_clean, left_on='SpecieID', right_on='SpecieId',)
-df_Crawl_Specie_Location = pandas.merge(df_Crawl_Specie, df_Location_Regions, left_on= 'Location', right_on='LocationID')
-
+df_Crawl_Specie = pandas.merge(df_Crawl_clean, df_Specie_clean, left_on='SpecieID', right_on='SpecieId',how='left')
+df_Crawl_Specie_Location = pandas.merge(df_Crawl_Specie, df_Location_Regions, left_on= 'Location', right_on='LocationID', how='left')
+print(df_Crawl.shape[0] == df_Crawl_Specie_Location.shape[0])
 # df_CrawlContact.shape[0]==df_CrawlContact.CrawlID.nunique()
 
 ### check for nan FullNames:
 for n in range(0,len(df_Contacts_Position_Organization)):
     print(df_Contacts_Position_Organization['FullName'][n],df_Contacts_Position_Organization['ContactId'][n])
 
-# c = Counter()
-# for n in range(0,len(df_CrawlContact)):
-#     crawl_id = df_CrawlContact['CrawlID'][n]
-#     contactid = df_CrawlContact['ContactID'][n]
-#     print('crawl_id: ', crawl_id,'ContactID: ', contactid)
-#     c[crawl_id]+=1
-
-
-
 
 ## להוסיף לפי Crawl id  את שם המדווח - אם יש כמה שמות- את הסטרינג שלהם, אם לא- אז את סטרינג המקור של שם המדווח
 
 def GetContactStr(crawlcontact_id):
-    iloc_contact_id = np.where(df_Contacts_Position_Organization['ContactId'] == crawlcontact_id)
-    contact = df_Contacts_Position_Organization.loc[df_Contacts_Position_Organization['ContactId'] == crawlcontact_id]
+    # iloc_contact_id = np.where(df_Contacts_Position_Organization['ContactId'] == crawlcontact_id)
     # contact = df_Contacts_Position_Organization.iloc[iloc_contact_id[0]]
+    contact = df_Contacts_Position_Organization.loc[df_Contacts_Position_Organization['ContactId'] == crawlcontact_id]
     contact_name = contact['FullName'].item()
     return contact_name
+
 
 df_Crawl_Specie_Location_Contacts=df_Crawl_Specie_Location
 df_Crawl_Specie_Location_Contacts['observers_names'] = ''
 
 
-
-crawl_ids_counter=Counter(df_CrawlContact.CrawlID)
-crawl_ids_counter=Counter(df_CrawlContact.CrawlID)
+crawl_ids_counter = Counter(df_CrawlContact.CrawlID)
+crawl_ids_counter = Counter(df_CrawlContact.CrawlID)
 
 for crawl_id in crawl_ids_counter.keys():
     # ilocs_of_crawl = np.where(df_CrawlContact['CrawlID'] == crawl_id)[0]
