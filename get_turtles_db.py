@@ -107,7 +107,6 @@ df_Crawl_Specie_Location_Contacts = df_Crawl_Specie_Location
 
 
 crawl_ids_counter = Counter(df_CrawlContact.CrawlID)
-
 for crawl_id in crawl_ids_counter.keys():
     more_contacts_str =''
     contacts_ids=df_CrawlContact.loc[df_CrawlContact.CrawlID == crawl_id]
@@ -133,29 +132,58 @@ for crawl_id in crawl_ids_counter.keys():
     contacts_ids_str = ', '.join(contacts_ids_list)
     df_Crawl_Specie_Location_Contacts.at[updating_index, 'contacts_ids'] = contacts_ids_str
 
-    print('new CrawlID: ', df_Crawl_Specie_Location_Contacts.at[updating_index, 'CrawlID'])
-    print('new main_observer_name: ',df_Crawl_Specie_Location_Contacts.at[updating_index, 'main_observer_name'])
-    print('new other_observers_names: ',df_Crawl_Specie_Location_Contacts.at[updating_index, 'other_observers_names'])
-    print('new contacts_ids: ',df_Crawl_Specie_Location_Contacts.at[updating_index, 'contacts_ids'])
-    print('-------------------------')
-    print('')
+    # print('new CrawlID: ', df_Crawl_Specie_Location_Contacts.at[updating_index, 'CrawlID'])
+    # print('new main_observer_name: ',df_Crawl_Specie_Location_Contacts.at[updating_index, 'main_observer_name'])
+    # print('new other_observers_names: ',df_Crawl_Specie_Location_Contacts.at[updating_index, 'other_observers_names'])
+    # print('new contacts_ids: ',df_Crawl_Specie_Location_Contacts.at[updating_index, 'contacts_ids'])
+    # print('-------------------------')
+    # print('')
 
 
+df_Crawl_Specie_Location_Contacts_Predators = df_Crawl_Specie_Location_Contacts
+crawl_predators_ids_counter = Counter(df_CrawlPredator.CrawlID)
+for crawl_id in crawl_predators_ids_counter.keys():
+    if not crawl_id >0:
+        print('is a null values', crawl_id)
+    else:
+        crawl_predators = df_CrawlPredator.loc[df_CrawlPredator.CrawlID == crawl_id]
+        crawl_predators_list = []
+
+        for crawl_predator in crawl_predators['PredatorTrack']:
+            if crawl_predator == None:
+                print('--------------------crawlpredator == None---------------------------')
+            else:
+                updating_index = np.where(df_Crawl_Specie_Location_Contacts_Predators['CrawlID']==crawl_id)[0][0]
+                df_Crawl_Specie_Location_Contacts_Predators.at[updating_index,'predation'] = "yes"
+                df_Crawl_Specie_Location_Contacts_Predators.at[updating_index,crawl_predator] = 1
 
 ##inspect data
 df_Crawl_Specie_Location_Contacts.columns ## which columns there are
 df_Crawl_Specie_Location_Contacts.Nest.unique() ## what values this col contains
+df_Clutches.CrawlID.value_counts()
 
+### inspect duplicates in clutches and nests
+clutches_counts= df_Clutches.CrawlID.value_counts() ### few crawls to one clutch
+for key in clutches_counts.keys():
+    if clutches_counts[key] > 1:
+        # print(key, clutches_counts[key])
+        clutches_with_same_crawl_id = df_Clutches.loc[df_Clutches.CrawlID==key]
+        # print(clutches_with_same_crawl_id) ### see if it's the same.
 
-
-
-
-
-
-
-
-
-
+        clutches_ids = clutches_with_same_crawl_id['ClutchID']
+        for id in clutches_ids:
+            nests = df_ClutchToNest.loc[df_ClutchToNest['ClutchID']==id]
+            # print('clutch_id: ', id)
+            # print('fitted nests: ', nests)
+            if len(nests)>1:
+                for nest_id in nests.NestID:
+                    # print(nest_id)
+                    nest = df_Nest.loc[df_Nest.NestID == nest_id]
+                    # print(nest)
+                    im = df_Immerging.loc[df_Immerging.NestID==nest_id]
+                    print(im)
+            print('-------------------------------')
+        # clutches = df_ClutchToNest.loc[df_ClutchToNest.ClutchID == key]
 
 # pd.merge(df_ClutchToNest,df_Nest,)
 # a= pd.merge(df_Nest)
