@@ -102,8 +102,8 @@ def GetContact(crawlcontact_id):
 
 
 df_Crawl_Specie_Location_Contacts = df_Crawl_Specie_Location
-df_Crawl_Specie_Location_Contacts['main_observer_name'] = ''
-df_Crawl_Specie_Location_Contacts['other_observers_names'] = ''
+# df_Crawl_Specie_Location_Contacts['main_observer_name'] = ''
+# df_Crawl_Specie_Location_Contacts['other_observers_names'] = ''
 
 
 crawl_ids_counter = Counter(df_CrawlContact.CrawlID)
@@ -113,35 +113,33 @@ for crawl_id in crawl_ids_counter.keys():
     contacts_ids=df_CrawlContact.loc[df_CrawlContact.CrawlID == crawl_id]
     contact_list = []
 
-    ### fixme from here-
-    # if len(contacts_ids)>1:
-    #     print(contacts_ids)
-    #     c=contacts_ids
-    #
-    #     contacts = df_Contacts_Position_Organization[df_Contacts_Position_Organization['ContactId'].isin(c['ContactID'])]##fixme contine here-- to bring more columns about main observer.
-
     for crawlcontact_id in contacts_ids['ContactID']:
         contact = df_Contacts_Position_Organization.loc[df_Contacts_Position_Organization['ContactId'] == crawlcontact_id]
         contact_name = contact['FullName'].item()
         contact_list.append(contact_name)
+
     main_contact_name = contact_list[0]
     if len(contact_list)>0:
         more_contacts_str = ', '.join(contact_list[1:])
-    print('crawl_id: ',crawl_id)
-    print('main_contac: ',main_contact_name)
-    print('more_contacts_str: ',more_contacts_str)
 
     updating_index = np.where(df_Crawl_Specie_Location_Contacts['CrawlID']==crawl_id)[0][0]
     df_Crawl_Specie_Location_Contacts.at[updating_index,'other_observers_names'] = more_contacts_str
     df_Crawl_Specie_Location_Contacts.at[updating_index,'main_observer_name'] = main_contact_name
-    # df_Crawl_Specie_Location_Contacts.at[updating_index,'main_observer_name'] = main_contact
     df_Crawl_Specie_Location_Contacts.at[updating_index, 'CrawlID']
+
+    contacts_ids_list = []
+    for i in contacts_ids['ContactID']:
+        contacts_ids_list.append(str(i))
+    contacts_ids_str = ', '.join(contacts_ids_list)
+    df_Crawl_Specie_Location_Contacts.at[updating_index, 'contacts_ids'] = contacts_ids_str
 
     print('new CrawlID: ', df_Crawl_Specie_Location_Contacts.at[updating_index, 'CrawlID'])
     print('new main_observer_name: ',df_Crawl_Specie_Location_Contacts.at[updating_index, 'main_observer_name'])
     print('new other_observers_names: ',df_Crawl_Specie_Location_Contacts.at[updating_index, 'other_observers_names'])
+    print('new contacts_ids: ',df_Crawl_Specie_Location_Contacts.at[updating_index, 'contacts_ids'])
     print('-------------------------')
     print('')
+
 
 
 ##inspect data
