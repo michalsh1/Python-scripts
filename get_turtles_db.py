@@ -1,20 +1,28 @@
 from collections import Counter
 
-import pyodbc
+# import pyodbc
 import pandas as pd
 import numpy as np
-
-def connect(db_path):
-    try:
-        odbc_connection_str = 'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=%s;' % (db_path)
-        connection = pyodbc.connect(odbc_connection_str)
-        print('connected successfully')
-        return connection
-    except pyodbc.Error as e:
-        print('error in connection', e)
-
+import sqlalchemy as sa
+driver = "{Microsoft Access Driver (*.mdb, *.accdb)}"
 db_path = "C:/Users/michalsh/Downloads/TurtlesDB_be.mdb"
-connection = connect(db_path)
+# def connect(db_path):
+#     try:
+#         odbc_connection_str = 'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=%s;' % (db_path)
+#         connection = pyodbc.connect(odbc_connection_str)
+#         print('connected successfully')
+#         return connection
+#     except pyodbc.Error as e:
+#         print('error in connection', e)
+# connection = connect(db_path)
+
+connection_string = 'DRIVER=%s;DBQ=%s;' % (driver,db_path)
+connection_url = sa.engine.URL.create(
+    "access+pyodbc",
+    query={"odbc_connect": connection_string}
+)
+engine = sa.create_engine(connection_url)
+connection= engine
 
 query_AcCrawl = "SELECT * FROM AcCrawl"
 query_AcHatch = "SELECT * FROM AcHatch"
