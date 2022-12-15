@@ -24,44 +24,15 @@ connection_url = sa.engine.URL.create(
 engine = sa.create_engine(connection_url)
 connection= engine
 
-query_AcCrawl = "SELECT * FROM AcCrawl"
-query_AcHatch = "SELECT * FROM AcHatch"
-query_Activities = "SELECT * FROM Activities"
-query_Clutches = "SELECT * FROM Clutches"
-query_ClutchToNest = "SELECT * FROM ClutchToNest"
-query_Contact = "SELECT * FROM Contact"
-query_ContactPosition = "SELECT * FROM ContactPosition"
-query_Crawl = "SELECT * FROM Crawl"
-query_CrawlContact = "SELECT * FROM CrawlContact"
-query_CrawlPredator = "SELECT * FROM CrawlPredator"
-query_Hatcheries = "SELECT * FROM Hatcheries"
-query_Immerging = "SELECT * FROM Immerging"
-query_Location = "SELECT * FROM Location"
-query_Nest = "SELECT * FROM Nest"
-query_Organization = "SELECT * FROM Organization"
-query_Specie = "SELECT * FROM Specie"
-query_TurtleEvent = "SELECT * FROM TurtleEvent"
-query_Regions = "SELECT * FROM Regions"
-
-
-df_AcCrawl = pd.read_sql(query_AcCrawl, connection)
-df_AcHatch = pd.read_sql(query_AcHatch, connection)
-df_Activities = pd.read_sql(query_Activities, connection)
-df_Clutches = pd.read_sql(query_Clutches, connection)
-df_ClutchToNest = pd.read_sql(query_ClutchToNest, connection)
-df_Contact = pd.read_sql(query_Contact, connection)
-df_ContactPosition = pd.read_sql(query_ContactPosition, connection)
-df_Crawl = pd.read_sql(query_Crawl, connection)
-df_CrawlContact = pd.read_sql(query_CrawlContact, connection)
-df_CrawlPredator = pd.read_sql(query_CrawlPredator, connection)
-df_Hatcheries = pd.read_sql(query_Hatcheries, connection)
-df_Immerging = pd.read_sql(query_Immerging, connection)
-df_Location = pd.read_sql(query_Location, connection)
-df_Nest = pd.read_sql(query_Nest, connection)
-df_Organization = pd.read_sql(query_Organization, connection)
-df_Specie = pd.read_sql(query_Specie, connection)
-df_TurtleEvent = pd.read_sql(query_TurtleEvent, connection)
-df_Regions = pd.read_sql(query_Regions, connection)
+list=['AcHatch','AcCrawl', 'Activities', 'Clutches', 'ClutchToNest','Contact',
+      'ContactPosition', 'Crawl', 'CrawlContact', 'CrawlPredator', 'Hatcheries',
+      'Immerging', 'Location', 'Nest', 'Organization', 'Specie', 'TurtleEvent', 'Regions']
+for i in list:
+    # print(i)
+    query ="SELECT * FROM %s" %(i)
+    print(query)
+    df = pd.read_sql(query, connection)
+    globals()['df_%s' % i] = df
 
 
 ### contact df:
